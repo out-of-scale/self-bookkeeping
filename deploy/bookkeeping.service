@@ -1,0 +1,15 @@
+[Unit]
+Description=Self Bookkeeping Backend
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/self-bookkeeping/backend
+EnvironmentFile=/opt/self-bookkeeping/backend/.env
+ExecStart=/opt/self-bookkeeping/backend/venv/bin/gunicorn main:app -w 2 -k uvicorn.workers.UvicornWorker -b 127.0.0.1:8000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
