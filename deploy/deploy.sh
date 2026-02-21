@@ -9,16 +9,30 @@ APP_DIR="/opt/self-bookkeeping"
 echo "===== 1. 安装系统依赖 ====="
 yum install -y python3 python3-pip nginx
 
-# 安装 Node.js 18
+# 安装 Node.js 20 (Vite 7 需要)
 if ! command -v node &> /dev/null; then
-    curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
+    curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
     yum install -y nodejs
 fi
 
 echo "===== 2. 配置后端 ====="
 cd $APP_DIR/backend
-python3 -m venv venv
+
+# 查找可用的 Python 3.8+ 版本
+if command -v python3.11 &> /dev/null; then
+    PY=python3.11
+elif command -v python3.9 &> /dev/null; then
+    PY=python3.9
+else
+    echo "安装 Python 3.11..."
+    yum install -y python3.11 python3.11-pip
+    PY=python3.11
+fi
+
+echo "使用 $PY"
+$PY -m venv venv
 source venv/bin/activate
+pip install --upgrade pip
 pip install -r requirements.txt
 pip install gunicorn
 
