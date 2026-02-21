@@ -58,8 +58,11 @@ cp $APP_DIR/deploy/nginx.conf /etc/nginx/conf.d/bookkeeping.conf
 setenforce 0 || true
 sed -i 's/^SELINUX=enforcing/SELINUX=permissive/' /etc/selinux/config || true
 
-# 注释掉默认的 server 块以避免冲突
-sed -i '/^\s*server {/,/^\s*}/s/^/#/' /etc/nginx/nginx.conf 2>/dev/null || true
+# 移除 CentOS 默认配置里的 server 块避免端口冲突
+if [ -f "/etc/nginx/nginx.conf" ]; then
+    # 删掉 include /etc/nginx/conf.d/*.conf 之外的默认 server
+    sed -i '/^[[:space:]]*server[[:space:]]*{/,/^[[:space:]]*}/ s/^/#/' /etc/nginx/nginx.conf 2>/dev/null || true
+fi
 systemctl daemon-reload
 nginx -t && systemctl enable --now nginx || systemctl restart nginx
 
