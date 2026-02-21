@@ -58,11 +58,33 @@ cp $APP_DIR/deploy/nginx.conf /etc/nginx/conf.d/bookkeeping.conf
 setenforce 0 || true
 sed -i 's/^SELINUX=enforcing/SELINUX=permissive/' /etc/selinux/config || true
 
-# 移除 CentOS 默认配置里的 server 块避免端口冲突
-if [ -f "/etc/nginx/nginx.conf" ]; then
-    # 删掉 include /etc/nginx/conf.d/*.conf 之外的默认 server
-    sed -i '/^[[:space:]]*server[[:space:]]*{/,/^[[:space:]]*}/ s/^/#/' /etc/nginx/nginx.conf 2>/dev/null || true
-fi
+# 彻底修复 CentOS 下被破坏的 nginx.conf 或者默认配置的 80 端口冲突
+cat > /etc/nginx/nginx.conf << 'EOF'
+user root;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+include /usr/share/nginx/modules/*.conf;
+events {
+    worker_connections 1024;
+}
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log  /var/log/nginx/access.log  main;
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 4096;
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+    
+    # 仅引入我们的自定义配置模块，不包含默认的 server
+    include /etc/nginx/conf.d/*.conf;
+}
+EOF
 systemctl daemon-reload
 nginx -t && systemctl enable --now nginx || systemctl restart nginx
 
