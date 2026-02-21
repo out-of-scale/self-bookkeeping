@@ -54,9 +54,14 @@ npm run build
 
 echo "===== 4. 配置 Nginx ====="
 cp $APP_DIR/deploy/nginx.conf /etc/nginx/conf.d/bookkeeping.conf
+# 临时关闭SELinux（如果因为SELinux导致Nginx无法读取前端文件）
+setenforce 0 || true
+sed -i 's/^SELINUX=enforcing/SELINUX=permissive/' /etc/selinux/config || true
+
 # 注释掉默认的 server 块以避免冲突
 sed -i '/^\s*server {/,/^\s*}/s/^/#/' /etc/nginx/nginx.conf 2>/dev/null || true
-nginx -t && systemctl enable nginx && systemctl restart nginx
+systemctl daemon-reload
+nginx -t && systemctl enable --now nginx || systemctl restart nginx
 
 echo "===== 5. 配置后端 systemd 服务 ====="
 cp $APP_DIR/deploy/bookkeeping.service /etc/systemd/system/
