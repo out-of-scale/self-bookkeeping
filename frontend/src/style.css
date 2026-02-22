@@ -2,46 +2,64 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* 主色 — 柔和靛蓝 */
-  --primary: #7c83f7;
-  --primary-light: #a5aaf8;
-  --primary-dark: #5b60e0;
+  /* 主色 — 简约温暖的质感原木/奶茶色调 */
+  --primary: #c2a383;
+  --primary-light: #d6bb9f;
+  --primary-dark: #a88b6b;
+  --accent: #d49a89;
 
-  /* 语义色 — 低饱和度 */
-  --success: #5bd9a4;
-  --danger: #f07070;
-  --warning: #f0c060;
-  --info: #70b8f0;
+  /* 语义色 — 莫兰迪低饱和度，温和内敛 */
+  --success: #82a88d;
+  --success-bg: rgba(130, 168, 141, 0.15);
+  --danger: #d98880;
+  --danger-bg: rgba(217, 136, 128, 0.15);
+  --warning: #eab676;
+  --info: #8eb1c7;
 
-  /* 背景 — 柔和深色 */
-  --bg-primary: #191c24;
-  --bg-secondary: #22262f;
-  --bg-card: #262a34;
-  --bg-card-hover: #2e3340;
+  /* 背景 — 温暖的纸张/米白色底色 */
+  --bg-app: #fcfbf9;
+  /* 整体底层白 */
+  --bg-primary: #fcfbf9;
+  /* 页面主背景 */
+  --bg-surface: #ffffff;
+  /* 卡片底层 */
+  --bg-card: rgba(255, 255, 255, 0.85);
+  /* 毛玻璃卡片层 */
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  --bg-float: rgba(252, 251, 249, 0.95);
+  /* 悬浮元素(底部导航、弹窗) */
 
-  /* 文字 */
-  --text-primary: #e8eaf0;
-  --text-secondary: #8b90a0;
-  --text-muted: #5c6070;
+  /* 文字 - 柔和深咖啡色代替刺眼的纯黑 */
+  --text-primary: #4a433d;
+  --text-secondary: #867e76;
+  --text-muted: #b5b0aa;
 
-  /* 边框 — 极淡 */
-  --border-color: rgba(255, 255, 255, 0.06);
+  /* 边框 — 存在感极低的温馨边线 */
+  --border-color: rgba(134, 126, 118, 0.15);
+  --border-light: rgba(134, 126, 118, 0.08);
 
-  /* 渐变 — 柔和 */
-  --gradient-primary: linear-gradient(135deg, #7c83f7, #a78bfa);
-  --gradient-income: linear-gradient(135deg, #5bd9a4, #34d399);
-  --gradient-expense: linear-gradient(135deg, #f07070, #f87171);
-  --gradient-balance: linear-gradient(135deg, #70b8f0, #60a5fa);
+  /* 渐变 — 极其微妙的光影过度，不再使用抢眼的高亮渐变 */
+  --gradient-primary: linear-gradient(135deg, #c2a383, #d6bb9f);
+  --gradient-income: linear-gradient(135deg, #82a88d, #a3c2af);
+  --gradient-expense: linear-gradient(135deg, #d98880, #e8a69f);
+  --gradient-balance: linear-gradient(135deg, #bfa080, #ccb095);
+  --gradient-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(252, 251, 249, 0.7) 100%);
 
-  /* 阴影 — 极浅 */
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2);
-  --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.15);
+  /* 高级阴影与景深效果 - 阴影带有一丝丝茶棕色，更显温馨 */
+  --shadow-sm: 0 2px 4px 0 rgba(100, 90, 80, 0.03);
+  --shadow-md: 0 4px 10px -2px rgba(100, 90, 80, 0.06);
+  --shadow-lg: 0 12px 24px -4px rgba(100, 90, 80, 0.08);
+  --shadow-glow: 0 0 20px rgba(194, 163, 131, 0.1);
 
-  /* 圆角 */
+  /* 圆角 — 更大的 Apple 级别 R 角 */
   --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* 动画曲线 */
+  --spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -69,11 +87,22 @@ body {
 /* ====== 统计卡片 ====== */
 .stat-card {
   background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-radius: var(--radius-md);
-  padding: 16px 20px;
+  padding: 20px;
   position: relative;
   overflow: hidden;
   border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-light);
+  background: var(--bg-card-hover);
 }
 
 .stat-card::before {
@@ -82,68 +111,85 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 3px;
+  opacity: 0.8;
 }
 
 .stat-card.expense::before {
-  background: var(--danger);
+  background: var(--gradient-expense);
 }
 
 .stat-card.income::before {
-  background: var(--success);
+  background: var(--gradient-income);
 }
 
 .stat-card.balance::before {
-  background: var(--info);
+  background: var(--gradient-balance);
 }
 
 .stat-card .label {
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: 13px;
+  color: var(--text-secondary);
   font-weight: 500;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .stat-card .value {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums;
+  margin-top: 4px;
 }
 
+/* 渐变文字效果 */
 .stat-card.expense .value {
-  color: var(--danger);
+  background: var(--gradient-expense);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .stat-card.income .value {
-  color: var(--success);
+  background: var(--gradient-income);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .stat-card.balance .value {
-  color: var(--info);
+  background: var(--gradient-balance);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* ====== 页面布局 ====== */
 .page-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 20px 16px;
 }
 
 .page-header {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .page-header h2 {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.5px;
 }
 
 .page-header .subtitle {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-muted);
-  margin-top: 2px;
+  margin-top: 4px;
+  font-weight: 500;
 }
 
 /* ====== 栅格 ====== */
@@ -164,20 +210,28 @@ body {
 /* ====== 图表容器 ====== */
 .chart-wrapper {
   background: var(--bg-card);
-  border-radius: var(--radius-md);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+}
+
+.chart-wrapper:hover {
+  box-shadow: var(--shadow-md);
 }
 
 .chart-wrapper .chart-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 14px;
+  color: var(--text-primary);
+  margin-bottom: 18px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 /* ====== 交易列表 ====== */
@@ -185,8 +239,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
+  padding: 14px 0;
   border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.transaction-item:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-sm);
+  padding: 14px 8px;
+  margin: 0 -8px;
 }
 
 .transaction-item:last-child {
@@ -259,42 +321,47 @@ body {
   }
 }
 
-/* ====== 底部导航栏 ====== */
+/* ====== 底部导航栏 (灵动岛风格悬浮舱) ====== */
 .bottom-nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 56px;
-  background: rgba(34, 38, 47, 0.92);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid var(--border-color);
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 48px);
+  max-width: 400px;
+  height: 64px;
+  background: var(--bg-float);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-light);
+  border-radius: 32px;
   display: flex;
   align-items: center;
   justify-content: space-around;
   z-index: 1000;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding: 0 16px;
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
 
 .bottom-nav .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   cursor: pointer;
   color: var(--text-muted);
-  transition: all 0.2s ease;
+  transition: all 0.3s var(--spring);
   text-decoration: none;
-  font-size: 10px;
-  font-weight: 500;
-  padding: 6px 16px;
-  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 20px;
   position: relative;
 }
 
 .bottom-nav .nav-item.active {
-  color: var(--primary-light);
+  color: var(--primary);
+  background: rgba(194, 163, 131, 0.1);
 }
 
 .bottom-nav .nav-item.active::after {
@@ -324,18 +391,23 @@ body {
 
 /* 底部导航间距 */
 .main-content {
-  padding-bottom: 72px;
+  padding-bottom: 110px;
 }
 
 /* ====== 过渡动画 ====== */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.fade-slide-enter-from {
   opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 /* ====== 空状态 ====== */

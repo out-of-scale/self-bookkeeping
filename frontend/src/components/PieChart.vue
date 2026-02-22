@@ -15,8 +15,8 @@ const chartRef = ref(null)
 let chart = null
 
 const COLORS = [
-  '#6366f1', '#f43f5e', '#10b981', '#f59e0b',
-  '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#64748b',
+  '#c2a383', '#d98880', '#82a88d', '#eab676',
+  '#8eb1c7', '#d6bb9f', '#e09d8d', '#769b8b', '#a9a098',
 ]
 
 function render() {

@@ -1,43 +1,53 @@
 <template>
   <div class="page-container" v-loading="loading">
     <div class="page-header">
-      <h2>📈 图表分析</h2>
+      <h2 style="display:flex;align-items:center;"><Icon name="trending-up" size="24" /> 图表分析</h2>
       <p class="subtitle">深入了解消费习惯</p>
     </div>
 
     <!-- 月份选择 -->
     <div class="month-selector">
-      <button class="month-btn" @click="prevMonth">◀</button>
-      <span class="month-label">{{ displayMonth }}</span>
-      <button class="month-btn" @click="nextMonth">▶</button>
+      <el-date-picker
+        v-model="selectedMonthDate"
+        type="month"
+        format="YYYY年MM月"
+        value-format="YYYY-MM"
+        :clearable="false"
+        class="elegant-date-picker"
+        @change="handleMonthChange"
+      >
+        <template #prefix>
+          <Icon name="calendar" size="18" style="color:var(--text-secondary); margin-right: 4px;" />
+        </template>
+      </el-date-picker>
     </div>
 
     <!-- 汇总卡片 -->
     <div class="grid-3" style="margin-bottom: 20px;">
       <div class="stat-card expense">
-        <div class="label">💸 支出</div>
+        <div class="label"><Icon name="dollar" size="16" /> 支出</div>
         <div class="value">¥{{ formatMoney(stats.total_expense) }}</div>
       </div>
       <div class="stat-card income">
-        <div class="label">💰 收入</div>
+        <div class="label"><Icon name="dollar" size="16" /> 收入</div>
         <div class="value">¥{{ formatMoney(stats.total_income) }}</div>
       </div>
       <div class="stat-card balance">
-        <div class="label">📊 结余</div>
+        <div class="label"><Icon name="bar-chart" size="16" /> 结余</div>
         <div class="value">¥{{ formatMoney(stats.balance) }}</div>
       </div>
     </div>
 
     <!-- 消费趋势折线图 -->
     <div class="chart-wrapper" style="margin-bottom: 16px;">
-      <div class="chart-title">📈 消费趋势</div>
+      <div class="chart-title"><Icon name="trending-up" /> 消费趋势</div>
       <LineChart v-if="stats.daily_expense.length > 0" :data="stats.daily_expense" :height="260" />
       <div v-else class="empty-state small"><div class="emoji">📈</div><div class="desc">暂无数据</div></div>
     </div>
 
     <!-- 支出构成 -->
     <div class="chart-wrapper">
-      <div class="chart-title">🏷️ 支出构成</div>
+      <div class="chart-title"><Icon name="pie-chart" /> 支出构成</div>
       <div v-if="stats.by_category.length > 0" class="category-bars">
         <div class="cat-row" v-for="(item, i) in stats.by_category" :key="item.category"
              :style="{ animationDelay: (i * 0.08) + 's' }">
@@ -66,12 +76,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { getMonthStats } from '../api'
 import LineChart from '../components/LineChart.vue'
+import Icon from '../components/Icon.vue'
 
-const catColors = ['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#64748b']
+const catColors = ['#c2a383', '#d98880', '#82a88d', '#eab676', '#8eb1c7', '#d6bb9f', '#e09d8d', '#769b8b', '#a9a098']
 const catBgColors = [
-  'rgba(99,102,241,0.2)', 'rgba(244,63,94,0.2)', 'rgba(16,185,129,0.2)',
-  'rgba(245,158,11,0.2)', 'rgba(59,130,246,0.2)', 'rgba(139,92,246,0.2)',
-  'rgba(236,72,153,0.2)', 'rgba(20,184,166,0.2)', 'rgba(100,116,139,0.2)',
+  'rgba(194,163,131,0.2)', 'rgba(217,136,128,0.2)', 'rgba(130,168,141,0.2)',
+  'rgba(234,182,118,0.2)', 'rgba(142,177,199,0.2)', 'rgba(214,187,159,0.2)',
+  'rgba(224,157,141,0.2)', 'rgba(118,155,139,0.2)', 'rgba(169,160,152,0.2)',
 ]
 
 const loading = ref(true)
@@ -79,7 +90,18 @@ const today = new Date()
 const currentYear = ref(today.getFullYear())
 const currentMonth = ref(today.getMonth() + 1)
 
-const displayMonth = computed(() => `${currentYear.value}年${currentMonth.value}月`)
+// 格式化为 'YYYY-MM'，以满足 DatePicker 的需求
+const mm = String(currentMonth.value).padStart(2, '0')
+const selectedMonthDate = ref(`${currentYear.value}-${mm}`)
+
+function handleMonthChange(val) {
+  if (val) {
+    const [y, m] = val.split('-')
+    currentYear.value = parseInt(y, 10)
+    currentMonth.value = parseInt(m, 10)
+    fetchData()
+  }
+}
 
 const stats = ref({
   total_expense: 0, total_income: 0, balance: 0,
@@ -96,17 +118,7 @@ const categoryIcons = {
 }
 function getCategoryIcon(cat) { return categoryIcons[cat] || '📦' }
 
-function prevMonth() {
-  currentMonth.value--
-  if (currentMonth.value < 1) { currentMonth.value = 12; currentYear.value-- }
-  fetchData()
-}
-
-function nextMonth() {
-  currentMonth.value++
-  if (currentMonth.value > 12) { currentMonth.value = 1; currentYear.value++ }
-  fetchData()
-}
+// 移除 prevMonth 和 nextMonth 函数，因为 DatePicker 自带控制
 
 async function fetchData() {
   loading.value = true
@@ -125,24 +137,34 @@ onMounted(fetchData)
 
 <style scoped>
 .month-selector {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 24px;
 }
-.month-btn {
-  width: 30px; height: 30px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 13px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: color 0.15s;
+:deep(.elegant-date-picker) {
+  width: 160px !important;
 }
-.month-btn:hover { color: var(--primary); border-color: var(--primary); }
-.month-label { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+:deep(.elegant-date-picker .el-input__wrapper) {
+  background: var(--bg-card) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+  padding: 8px 12px !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+:deep(.elegant-date-picker .el-input__wrapper:hover) {
+  border-color: var(--primary-light) !important;
+  box-shadow: var(--shadow-md) !important;
+  transform: translateY(-2px);
+}
+:deep(.elegant-date-picker .el-input__inner) {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer !important;
+  text-align: center !important;
+  padding: 0 !important;
+}
 
 /* 分类条形图 */
 .category-bars { display: flex; flex-direction: column; gap: 14px; }

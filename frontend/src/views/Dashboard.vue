@@ -1,30 +1,32 @@
 <template>
   <div class="page-container" v-loading="loading">
     <div class="page-header">
-      <h2>📊 本月概况</h2>
+      <h2 style="display:flex;align-items:center;"><Icon name="bar-chart" size="24" /> 本月概况</h2>
       <p class="subtitle">{{ currentMonthLabel }}</p>
     </div>
 
-    <!-- 资产总览卡片 (新增) -->
-    <div class="net-worth-card" @click="showNetWorthDialog = true">
-      <div class="nw-label">💰 总净资产 <span class="edit-icon">✏️</span></div>
+    <!-- 资产总览卡片 (全息渐变质感) -->
+    <div class="net-worth-card">
+      <div class="nw-label">
+        <Icon name="dollar" /> 总净资产 
+        <span class="edit-icon" @click="showNetWorthDialog = true"><Icon name="edit" size="14" style="margin:0;opacity:1;" /></span>
+      </div>
       <div class="nw-value">¥{{ formatMoney(netWorth.net_worth) }}</div>
-      <div class="nw-desc" v-if="netWorth.base_worth">包含初始设定的 ¥{{ formatMoney(netWorth.base_worth) }}</div>
-      <div class="nw-desc" v-else>点击设定此刻的所有存款总计</div>
+      <div class="nw-desc" v-if="netWorth.base_worth">包含校准基数 ¥{{ formatMoney(netWorth.base_worth) }}</div>
     </div>
 
-    <!-- 三卡片汇总 -->
+    <!-- 三大核心指标 (流式毛玻璃卡片) -->
     <div class="grid-3">
       <div class="stat-card expense">
-        <div class="label">💸 总支出</div>
+        <div class="label"><Icon name="dollar" size="16" /> 本月支出</div>
         <div class="value">¥{{ formatMoney(stats.total_expense) }}</div>
       </div>
       <div class="stat-card income">
-        <div class="label">💰 总收入</div>
+        <div class="label"><Icon name="dollar" size="16" /> 本月收入</div>
         <div class="value">¥{{ formatMoney(stats.total_income) }}</div>
       </div>
       <div class="stat-card balance">
-        <div class="label">📈 结余</div>
+        <div class="label"><Icon name="trending-up" size="16" /> 本月结余</div>
         <div class="value" :class="{ negative: stats.balance < 0 }">¥{{ formatMoney(stats.balance) }}</div>
       </div>
     </div>
@@ -32,7 +34,7 @@
     <!-- 图表区域 -->
     <!-- 支出分类 -->
     <div class="chart-wrapper">
-      <div class="chart-title">🏷️ 支出分类</div>
+      <div class="chart-title"><Icon name="pie-chart" /> 支出分类</div>
       <div v-if="stats.by_category.length > 0" class="category-bars">
         <div class="cat-row" v-for="(item, i) in stats.by_category" :key="item.category"
              :style="{ animationDelay: (i * 0.08) + 's' }">
@@ -55,7 +57,7 @@
 
     <!-- 每日支出 -->
     <div class="chart-wrapper">
-      <div class="chart-title">📊 每日支出</div>
+      <div class="chart-title"><Icon name="bar-chart" /> 每日支出</div>
       <BarChart v-if="stats.daily_expense.length > 0" :data="stats.daily_expense" />
       <div v-else class="empty-state small"><div class="emoji">📅</div><div class="desc">暂无数据</div></div>
     </div>
@@ -63,7 +65,7 @@
     <!-- 最近交易 -->
     <div class="chart-wrapper">
       <div class="chart-title" style="display:flex;justify-content:space-between;align-items:center;">
-        <span>📝 最近交易</span>
+        <span style="display:flex;align-items:center;"><Icon name="list" /> 最近交易</span>
         <router-link to="/records" class="view-all-btn">查看全部 →</router-link>
       </div>
       <div v-if="receipts.length > 0">
@@ -114,6 +116,7 @@ import { ref, computed, onMounted } from 'vue'
 import { getMonthStats, getReceipts, getNetWorth, updateNetWorth } from '../api'
 import { ElMessage } from 'element-plus'
 import BarChart from '../components/BarChart.vue'
+import Icon from '../components/Icon.vue'
 
 const loading = ref(true)
 const stats = ref({
@@ -146,11 +149,11 @@ const categoryIcons = {
   '餐饮': '🍜', '交通': '🚗', '购物': '🛍️', '娱乐': '🎮',
   '医疗': '🏥', '教育': '📚', '住房': '🏠', '通讯': '📱', '其他': '📦',
 }
-const catColors = ['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#64748b']
+const catColors = ['#c2a383', '#d98880', '#82a88d', '#eab676', '#8eb1c7', '#d6bb9f', '#e09d8d', '#769b8b', '#a9a098']
 const catBgColors = [
-  'rgba(99,102,241,0.2)', 'rgba(244,63,94,0.2)', 'rgba(16,185,129,0.2)',
-  'rgba(245,158,11,0.2)', 'rgba(59,130,246,0.2)', 'rgba(139,92,246,0.2)',
-  'rgba(236,72,153,0.2)', 'rgba(20,184,166,0.2)', 'rgba(100,116,139,0.2)',
+  'rgba(194,163,131,0.2)', 'rgba(217,136,128,0.2)', 'rgba(130,168,141,0.2)',
+  'rgba(234,182,118,0.2)', 'rgba(142,177,199,0.2)', 'rgba(214,187,159,0.2)',
+  'rgba(224,157,141,0.2)', 'rgba(118,155,139,0.2)', 'rgba(169,160,152,0.2)',
 ]
 const categoryColors = {
   '餐饮': 'rgba(99,102,241,0.2)', '交通': 'rgba(59,130,246,0.2)', '购物': 'rgba(244,63,94,0.2)',
@@ -207,40 +210,72 @@ async function submitNetWorth() {
 }
 .view-all-btn:hover { color: var(--primary); }
 .empty-state.small { padding: 40px 20px; }
-.negative { color: #f87171 !important; }
+.negative { color: #e8a69f !important; }
 
-/* 净资产卡片 */
+/* 全息质感净资产卡片 */
 .net-worth-card {
-  background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 20px;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-xl);
+  padding: 28px 24px;
+  margin-bottom: 24px;
   color: white;
-  box-shadow: 0 8px 16px -4px rgba(79, 70, 229, 0.4);
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 10px 30px -5px rgba(194, 163, 131, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  transition: transform 0.3s var(--spring), box-shadow 0.3s var(--ease);
+  position: relative;
+  overflow: hidden;
 }
+
+.net-worth-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.net-worth-card:hover {
+  box-shadow: 0 15px 35px -5px rgba(194, 163, 131, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+
+.net-worth-card:hover::after {
+  opacity: 1;
+}
+
 .net-worth-card:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 .nw-label {
-  font-size: 14px;
+  font-size: 15px;
   opacity: 0.9;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
 }
 .edit-icon {
   font-size: 12px;
   opacity: 0.6;
+  cursor: pointer;
+  padding: 4px;
+}
+.edit-icon:hover {
+  opacity: 1;
 }
 .nw-value {
-  font-size: 36px;
+  font-size: 42px;
   font-weight: 700;
-  margin: 8px 0;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin: 12px 0 8px 0;
+  text-shadow: 0 4px 8px rgba(0,0,0,0.15);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+  position: relative;
+  z-index: 1;
 }
 .nw-desc {
   font-size: 12px;

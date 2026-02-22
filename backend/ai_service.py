@@ -79,7 +79,7 @@ async def recognize_receipt(image_base64: str) -> dict:
     }
 
     payload = {
-        "model": "GLM-4.6V-Flash",
+        "model": "GLM-4.6V-FlashX",
         "messages": [
             {
                 "role": "user",

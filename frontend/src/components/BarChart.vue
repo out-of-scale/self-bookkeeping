@@ -25,50 +25,55 @@ function render() {
   chart.setOption({
     tooltip: {
       trigger: 'axis',
-      backgroundColor: 'rgba(30, 41, 59, 0.95)',
-      borderColor: '#334155',
-      textStyle: { color: '#f1f5f9', fontSize: 13 },
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: 'rgba(0, 0, 0, 0.05)',
+      padding: [8, 12],
+      textStyle: { color: '#0f172a', fontSize: 13 },
       formatter: (params) => {
         const p = params[0]
-        return `${p.axisValue}<br/>💸 ¥${Number(p.value).toLocaleString()}`
+        return `<div style="font-weight:600;margin-bottom:4px;color:#334155">${p.axisValue}</div>
+                <div style="font-family:tabular-nums">支出: ¥${Number(p.value).toLocaleString()}</div>`
       },
     },
-    grid: { top: 36, right: 12, bottom: 28, left: 46 },
+    grid: { top: 30, right: 10, bottom: 20, left: 10, containLabel: true },
     xAxis: {
       type: 'category',
       data: dates,
-      axisLabel: { color: '#64748b', fontSize: 11 },
-      axisLine: { lineStyle: { color: '#334155' } },
+      axisLabel: { color: '#64748b', fontSize: 11, margin: 12 },
+      axisLine: { show: false },
       axisTick: { show: false },
     },
     yAxis: {
       type: 'value',
-      splitNumber: 4,
+      splitNumber: 3,
       axisLabel: {
         color: '#64748b',
         fontSize: 11,
-        formatter: (v) => '¥' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v),
+        formatter: (v) => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v,
       },
-      splitLine: { lineStyle: { color: '#1e293b', type: 'dashed' } },
+      splitLine: { 
+        lineStyle: { 
+          color: 'rgba(0,0,0,0.05)', 
+          type: 'solid' 
+        } 
+      },
     },
     series: [{
       type: 'bar',
       data: amounts,
-      barWidth: '40%',
-      barMaxWidth: 40,
+      barWidth: '35%',
+      barMaxWidth: 30,
       itemStyle: {
         color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: '#818cf8' },
-          { offset: 1, color: '#4f46e5' },
+          { offset: 0, color: '#d6bb9f' },
+          { offset: 1, color: '#c2a383' },
         ]),
-        borderRadius: [6, 6, 0, 0],
+        borderRadius: [6, 6, 6, 6],
       },
+      animationDuration: 1000,
+      animationEasing: 'cubicOut',
       label: {
-        show: true,
-        position: 'top',
-        color: '#94a3b8',
-        fontSize: 11,
-        formatter: (p) => '¥' + p.value,
+        show: false, // 移除柱子顶部的文字，使图表更干净，信息通过 Tooltip 展示
       },
     }],
   }, true)
