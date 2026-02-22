@@ -5,6 +5,14 @@
       <p class="subtitle">{{ currentMonthLabel }}</p>
     </div>
 
+    <!-- 资产总览卡片 (新增) -->
+    <div class="net-worth-card" @click="showNetWorthDialog = true">
+      <div class="nw-label">💰 总净资产 <span class="edit-icon">✏️</span></div>
+      <div class="nw-value">¥{{ formatMoney(netWorth.net_worth) }}</div>
+      <div class="nw-desc" v-if="netWorth.base_worth">包含初始设定的 ¥{{ formatMoney(netWorth.base_worth) }}</div>
+      <div class="nw-desc" v-else>点击设定此刻的所有存款总计</div>
+    </div>
+
     <!-- 三卡片汇总 -->
     <div class="grid-3">
       <div class="stat-card expense">
@@ -80,12 +88,31 @@
         <div class="desc">使用 iPhone 快捷指令上传支付截图开始记账</div>
       </div>
     </div>
+
+    <!-- 净资产校准弹窗 (新增) -->
+    <el-dialog v-model="showNetWorthDialog" title="核对资产" width="90%" custom-class="mobile-dialog">
+      <div class="dialog-tip">请计算您目前所有银行卡、微信、支付宝的余额总和，并填入下方。系统会自动反推并记录账本的误差。</div>
+      <el-input 
+        v-model="inputNetWorth" 
+        type="number" 
+        placeholder="例如: 56000.00"
+        size="large">
+        <template #prepend>¥</template>
+      </el-input>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showNetWorthDialog = false">取消</el-button>
+          <el-button type="primary" @click="submitNetWorth" :loading="savingNetWorth">保存校准</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { getMonthStats, getReceipts } from '../api'
+import { getMonthStats, getReceipts, getNetWorth, updateNetWorth } from '../api'
+import { ElMessage } from 'element-plus'
 import BarChart from '../components/BarChart.vue'
 
 const loading = ref(true)
@@ -94,6 +121,12 @@ const stats = ref({
   by_category: [], daily_expense: [],
 })
 const receipts = ref([])
+
+// 资产相关
+const netWorth = ref({ net_worth: 0, base_worth: 0 })
+const showNetWorthDialog = ref(false)
+const inputNetWorth = ref('')
+const savingNetWorth = ref(false)
 
 const today = new Date()
 const currentMonthLabel = computed(() => `${today.getFullYear()}年${today.getMonth() + 1}月`)
@@ -129,18 +162,39 @@ function getCategoryColor(cat) { return categoryColors[cat] || 'rgba(100,116,139
 
 onMounted(async () => {
   try {
-    const [statsRes, receiptsRes] = await Promise.all([
+    const [statsRes, receiptsRes, netWorthRes] = await Promise.all([
       getMonthStats(today.getFullYear(), today.getMonth() + 1),
       getReceipts({ page: 1, page_size: 10 }),
+      getNetWorth()
     ])
     stats.value = statsRes.data
     receipts.value = receiptsRes.data.items
+    netWorth.value = netWorthRes.data
+    inputNetWorth.value = netWorthRes.data.net_worth
   } catch (e) {
     console.error('Failed to load dashboard data:', e)
   } finally {
     loading.value = false
   }
 })
+
+async function submitNetWorth() {
+  if (!inputNetWorth.value) {
+    ElMessage.warning('请输入当前总资产金额')
+    return
+  }
+  savingNetWorth.value = true
+  try {
+    const res = await updateNetWorth(Number(inputNetWorth.value))
+    netWorth.value = res.data
+    ElMessage.success('资产校准成功！')
+    showNetWorthDialog.value = false
+  } catch (e) {
+    ElMessage.error('校准失败：' + (e.response?.data?.detail || e.message))
+  } finally {
+    savingNetWorth.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -154,6 +208,52 @@ onMounted(async () => {
 .view-all-btn:hover { color: var(--primary); }
 .empty-state.small { padding: 40px 20px; }
 .negative { color: #f87171 !important; }
+
+/* 净资产卡片 */
+.net-worth-card {
+  background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  color: white;
+  box-shadow: 0 8px 16px -4px rgba(79, 70, 229, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.net-worth-card:active {
+  transform: scale(0.98);
+}
+.nw-label {
+  font-size: 14px;
+  opacity: 0.9;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.edit-icon {
+  font-size: 12px;
+  opacity: 0.6;
+}
+.nw-value {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 8px 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-variant-numeric: tabular-nums;
+}
+.nw-desc {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+/* 弹窗底部提示 */
+.dialog-tip {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
 
 /* 分类条形图 */
 .category-bars { display: flex; flex-direction: column; gap: 14px; }

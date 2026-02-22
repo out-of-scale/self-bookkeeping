@@ -92,3 +92,16 @@ class ReceiptListResponse(BaseModel):
     page: int
     page_size: int
     items: list[ReceiptData]
+
+
+class NetWorthResponse(BaseModel):
+    """净资产总额响应"""
+    net_worth: float
+    base_worth: float
+    total_income: float
+    total_expense: float
+
+
+class UpdateNetWorthRequest(BaseModel):
+    """更新净资产请求"""
+    current_net_worth: float = Field(..., description="当前实际拥有的总资产")

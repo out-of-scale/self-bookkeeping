@@ -43,4 +43,14 @@ export function manualAddReceipt(data) {
     return api.post('/receipts/manual', data)
 }
 
+/** 获取总净资产 */
+export function getNetWorth() {
+    return api.get('/net_worth')
+}
+
+/** 手动更新/校准总净资产 */
+export function updateNetWorth(currentNetWorth) {
+    return api.put('/net_worth', { current_net_worth: currentNetWorth })
+}
+
 export default api

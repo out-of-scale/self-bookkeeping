@@ -151,7 +151,63 @@ async def upload_receipt(req: UploadReceiptRequest, db: Session = Depends(get_db
         raise HTTPException(status_code=500, detail=f"服务器错误: {str(e)}")
 
 
-# ==================== 统计接口 ====================
+# ==================== 资产与统计接口 ====================
+
+@app.get("/api/net_worth", response_model=NetWorthResponse)
+def get_net_worth(db: Session = Depends(get_db)):
+    """获取当前总净资产。总资产 = 初始基数(如有) + 历史总收入 - 历史总支出"""
+    
+    # 获取设置的 base_worth，如果没有则默认为 0
+    from models import Setting
+    setting = db.query(Setting).filter(Setting.key == "net_worth_base").first()
+    base_worth = float(setting.value) if setting else 0.0
+
+    # 计算历史所有的收支总和
+    receipts = db.query(Receipt).all()
+    total_income = sum(r.amount for r in receipts if r.type == "income")
+    total_expense = sum(r.amount for r in receipts if r.type == "expense")
+    
+    net_worth = base_worth + total_income - total_expense
+
+    return NetWorthResponse(
+        net_worth=round(net_worth, 2),
+        base_worth=round(base_worth, 2),
+        total_income=round(total_income, 2),
+        total_expense=round(total_expense, 2),
+    )
+
+
+@app.put("/api/net_worth", response_model=NetWorthResponse)
+def update_net_worth(req: UpdateNetWorthRequest, db: Session = Depends(get_db)):
+    """手动校准当前总资产。会反向计算并更新 base_worth"""
+    target_net_worth = req.current_net_worth
+    
+    # 计算当前历史流水差额
+    receipts = db.query(Receipt).all()
+    total_income = sum(r.amount for r in receipts if r.type == "income")
+    total_expense = sum(r.amount for r in receipts if r.type == "expense")
+    history_diff = total_income - total_expense
+    
+    # 新的 base_worth = 目标总资产 - 历史流水差额
+    new_base = target_net_worth - history_diff
+
+    from models import Setting
+    setting = db.query(Setting).filter(Setting.key == "net_worth_base").first()
+    if not setting:
+        setting = Setting(key="net_worth_base", value=str(new_base))
+        db.add(setting)
+    else:
+        setting.value = str(new_base)
+        
+    db.commit()
+    
+    return NetWorthResponse(
+        net_worth=round(target_net_worth, 2),
+        base_worth=round(new_base, 2),
+        total_income=round(total_income, 2),
+        total_expense=round(total_expense, 2),
+    )
+
 
 @app.get("/api/get_stats", response_model=MonthStatsResponse)
 def get_stats(
