@@ -108,8 +108,12 @@ async def upload_receipt(req: UploadReceiptRequest, db: Session = Depends(get_db
         )
 
     except ValueError as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"服务器错误: {str(e)}")
 
 
