@@ -35,5 +35,5 @@ def get_db():
 
 def init_db():
     """初始化数据库，创建所有表"""
-    from models import Receipt  # noqa: F401
+    from models import Receipt, Setting  # noqa: F401
     Base.metadata.create_all(bind=engine)

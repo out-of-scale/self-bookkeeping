@@ -24,6 +24,8 @@ from schemas import (
     MonthStatsResponse, CategoryStat, DailyStat,
     YearlyResponse, MonthlySummary,
     ReceiptListResponse,
+    NetWorthResponse,
+    UpdateNetWorthRequest,
 )
 from ai_service import recognize_receipt
 
