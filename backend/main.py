@@ -32,6 +32,29 @@ from ai_service import recognize_receipt
 async def lifespan(app: FastAPI):
     """应用生命周期：启动时初始化数据库"""
     init_db()
+    
+    # 自动修复历史脏数据（如把 "2026-2-22" 修正为 "2026-02-22"）
+    try:
+        from database import SessionLocal
+        db = SessionLocal()
+        receipts = db.query(Receipt).all()
+        changed = False
+        for r in receipts:
+            if r.date and len(r.date) < 10:
+                try:
+                    dt = datetime.strptime(r.date, "%Y-%m-%d")
+                    padded = dt.strftime("%Y-%m-%d")
+                    if padded != r.date:
+                        r.date = padded
+                        changed = True
+                except Exception:
+                    pass
+        if changed:
+            db.commit()
+        db.close()
+    except Exception as e:
+        print(f"Data migration failed: {e}")
+
     yield
 
 

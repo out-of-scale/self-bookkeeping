@@ -157,7 +157,8 @@ def _parse_and_clean(raw_content: str) -> dict:
     # 清洗 date：确保格式正确
     try:
         from datetime import datetime
-        datetime.strptime(data["date"], "%Y-%m-%d")
+        dt = datetime.strptime(data["date"], "%Y-%m-%d")
+        data["date"] = dt.strftime("%Y-%m-%d")  # 强制转为 YYYY-MM-DD (自动补零)
     except (ValueError, TypeError):
         data["date"] = date.today().isoformat()
 
