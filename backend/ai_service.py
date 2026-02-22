@@ -153,6 +153,10 @@ def _parse_and_clean(raw_content: str) -> dict:
     # 清洗 category
     if data["category"] not in VALID_CATEGORIES:
         data["category"] = "其他"
+        
+    # 清洗 merchant (处理为空或为 "未知" 的情况)
+    if not data.get("merchant") or str(data["merchant"]).strip() in ["", "None", "未知", "null"]:
+        data["merchant"] = "转账/入账" if data["type"] == "income" else "未知商户"
 
     # 清洗 date：确保格式正确
     try:

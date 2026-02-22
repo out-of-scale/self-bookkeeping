@@ -43,6 +43,11 @@ async def lifespan(app: FastAPI):
             if not r.date:
                 continue
             
+            # 修复商户名为空的情况
+            if not r.merchant or str(r.merchant).strip() in ["", "None", "未知", "null"]:
+                r.merchant = "转账/入账" if r.type == "income" else "未知商户"
+                changed = True
+
             clean_date = r.date.strip()
             
             # 如果清理空格后依然不符合 YYYY-MM-DD，尝试补零
