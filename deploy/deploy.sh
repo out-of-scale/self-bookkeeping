@@ -7,27 +7,20 @@ set -e
 APP_DIR="/opt/self-bookkeeping"
 
 echo "===== 1. 安装系统依赖 ====="
-yum install -y python3 python3-pip nginx
+apt update && apt upgrade -y
+apt install -y python3 python3-pip python3-venv nginx curl
 
 # 安装 Node.js 20 (Vite 7 需要)
 if ! command -v node &> /dev/null; then
-    curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
-    yum install -y nodejs
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt install -y nodejs
 fi
 
 echo "===== 2. 配置后端 ====="
 cd $APP_DIR/backend
 
-# 查找可用的 Python 3.8+ 版本
-if command -v python3.11 &> /dev/null; then
-    PY=python3.11
-elif command -v python3.9 &> /dev/null; then
-    PY=python3.9
-else
-    echo "安装 Python 3.11..."
-    yum install -y python3.11 python3.11-pip
-    PY=python3.11
-fi
+# Ubuntu 自带比较新的 Python3 且通常被链接为 python3
+PY="python3"
 
 echo "使用 $PY"
 $PY -m venv venv
@@ -54,11 +47,8 @@ npm run build
 
 echo "===== 4. 配置 Nginx ====="
 cp $APP_DIR/deploy/nginx.conf /etc/nginx/conf.d/bookkeeping.conf
-# 临时关闭SELinux（如果因为SELinux导致Nginx无法读取前端文件）
-setenforce 0 || true
-sed -i 's/^SELINUX=enforcing/SELINUX=permissive/' /etc/selinux/config || true
-
-# 彻底修复 CentOS 下被破坏的 nginx.conf 或者默认配置的 80 端口冲突
+# 原来的 CentOS SELinux 步骤在纯净 Ubuntu 中不需要
+# Ubuntu 下直接替换 Nginx 配置即可
 cat > /etc/nginx/nginx.conf << 'EOF'
 user root;
 worker_processes auto;
